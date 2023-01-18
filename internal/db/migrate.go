@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -9,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// MigrateDB - runs all migrations in the migrations
 func (d *Database) MigrateDB() error {
 	fmt.Println("migrating our database")
 
@@ -27,7 +29,9 @@ func (d *Database) MigrateDB() error {
 	}
 
 	if err := m.Up(); err != nil {
-		return fmt.Errorf("could not run up migrations: %w", err)
+		if !errors.Is(err, migrate.ErrNoChange) {
+			return fmt.Errorf("could not run up migrations: %w", err)
+		}
 	}
 
 	fmt.Println("successfully migrated the database")

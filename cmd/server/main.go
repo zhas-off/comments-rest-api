@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 
+	"github.com/zhas-off/production-rest-api/internal/comment"
 	"github.com/zhas-off/production-rest-api/internal/db"
+	transportHttp "github.com/zhas-off/production-rest-api/internal/transport/http"
 )
 
 func Run() error {
@@ -16,6 +18,13 @@ func Run() error {
 	}
 	if err := db.MigrateDB(); err != nil {
 		fmt.Println("failed to migrate database")
+		return err
+	}
+
+	cmtService := comment.NewService(db)
+
+	httpHandler := transportHttp.NewHandler(cmtService)
+	if err := httpHandler.Serve(); err != nil {
 		return err
 	}
 	return nil
