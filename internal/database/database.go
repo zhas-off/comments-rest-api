@@ -1,4 +1,4 @@
-package db
+package database
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	log "github.com/sirupsen/logrus"
 )
 
 type Database struct {
@@ -15,6 +16,8 @@ type Database struct {
 
 // NewDatabase - returns a pointer to a database object
 func NewDatabase() (*Database, error) {
+	log.Info("Setting up new database connection")
+
 	connectionString := fmt.Sprintf(
 		"host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		os.Getenv("DB_HOST"),
@@ -24,13 +27,14 @@ func NewDatabase() (*Database, error) {
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("SSL_MODE"),
 	)
-	dbConn, err := sqlx.Connect("postgres", connectionString)
+
+	db, err := sqlx.Connect("postgres", connectionString)
 	if err != nil {
-		return &Database{}, fmt.Errorf("could not connect to the database: %w", err)
+		return &Database{}, fmt.Errorf("could not connect to database: %w", err)
 	}
 
 	return &Database{
-		Client: dbConn,
+		Client: db,
 	}, nil
 }
 

@@ -1,38 +1,43 @@
 package main
 
 import (
-	"fmt"
-
+	log "github.com/sirupsen/logrus"
 	"github.com/zhas-off/production-rest-api/internal/comment"
-	"github.com/zhas-off/production-rest-api/internal/db"
-	transportHttp "github.com/zhas-off/production-rest-api/internal/transport/http"
+	"github.com/zhas-off/production-rest-api/internal/database"
+	transportHTTP "github.com/zhas-off/production-rest-api/internal/transport/http"
 )
 
+// Run - sets up our application
 func Run() error {
-	fmt.Println("Starting our application")
+	log.SetFormatter(&log.JSONFormatter{})
+	log.Info("Setting Up Our APP")
 
-	db, err := db.NewDatabase()
+	var err error
+	store, err := database.NewDatabase() //connecting to database
 	if err != nil {
-		fmt.Println("Failed to connect to the database")
+		log.Error("failed to setup connection to the database")
 		return err
 	}
-	if err := db.MigrateDB(); err != nil {
-		fmt.Println("failed to migrate database")
+	err = store.MigrateDB()
+	if err != nil {
+		log.Error("failed to setup database")
 		return err
 	}
 
-	cmtService := comment.NewService(db)
+	commentService := comment.NewService(store)
+	handler := transportHTTP.NewHandler(commentService)
 
-	httpHandler := transportHttp.NewHandler(cmtService)
-	if err := httpHandler.Serve(); err != nil {
+	if err := handler.Serve(); err != nil {
+		log.Error("failed to gracefully serve our application")
 		return err
 	}
+
 	return nil
 }
 
 func main() {
-	fmt.Println("Hello rest api")
 	if err := Run(); err != nil {
-		fmt.Println(err)
+		log.Error(err)
+		log.Fatal("Error starting up our REST API")
 	}
 }
