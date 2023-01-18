@@ -47,12 +47,12 @@ func (s *Service) GetComment(ctx context.Context, id string) (Comment, error) {
 }
 
 // UpdateComment - updates a comment by ID with new comment info
-func (s *Service) UpdateComment(ctx context.Context, cmt Comment) error {
+func (s *Service) UpdateComment(ctx context.Context, ID string, newCmt Comment) error {
 	return ErrNotImplemented
 }
 
 // DeleteComment - deletes a comment from the database by ID
-func (s *Service) DeleteComment(ctx context.Context, cmt Comment) error {
+func (s *Service) DeleteComment(ctx context.Context, ID string) error {
 	return ErrNotImplemented
 }
 
